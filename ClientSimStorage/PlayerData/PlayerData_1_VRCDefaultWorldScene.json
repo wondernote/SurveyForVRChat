@@ -1,0 +1,18 @@
+{
+  "SurveyAnswered": {
+    "LastUpdated": "2025-04-13T10:15:14.0476444+09:00",
+    "Key": "SurveyAnswered",
+    "Value": {
+      "type": "Bool",
+      "value": true
+    }
+  },
+  "SurveyAnswered_7c59674e-b6aa-4ddd-847f-0f39f32c3cf7": {
+    "LastUpdated": "2025-06-04T19:59:36.4455655+09:00",
+    "Key": "SurveyAnswered_7c59674e-b6aa-4ddd-847f-0f39f32c3cf7",
+    "Value": {
+      "type": "Bool",
+      "value": true
+    }
+  }
+}

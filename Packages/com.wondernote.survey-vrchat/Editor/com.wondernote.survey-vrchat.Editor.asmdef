@@ -1,0 +1,24 @@
+{
+    "name": "com.wondernote.survey-vrchat.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:6490804aa441dfe4b88eb56cccbdf081",
+        "GUID:1b3abf7e59395d84c84b48d69677daaa",
+        "GUID:3456780c4fb2d324ab9c633d6f1b0ddb",
+        "GUID:6e9c6119ac4eb334284fb7b4bc6d1f05",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:ca0f564c2ec54344da7881e8b35b847c",
+        "GUID:99835874ee819da44948776e0df4ff1d"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

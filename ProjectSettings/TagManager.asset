@@ -8,26 +8,26 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - reserved3
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - reserved6
+  - reserved7
+  - Interactive
+  - Player
+  - PlayerLocal
+  - Environment
+  - UiMenu
+  - Pickup
+  - PickupNoEnvironment
+  - StereoLeft
+  - StereoRight
+  - Walkthrough
+  - MirrorReflection
+  - InternalUI
+  - HardwareObjects
+  - reserved4
+  - EditorOnly
   - 
   - 
   - 
