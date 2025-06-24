@@ -55,6 +55,10 @@ public class FreeTextPanelController : FadePanel
         originalJumpImpulse = localPlayer.GetJumpImpulse();
         lastUrl = presetPrefixUrl;
         urlPrefix = presetPrefixUrl.Get();
+
+        if (questionIndex == 0 && actualText != null) {
+            actualText.color = new Color32(50, 50, 50, 255);
+        }
     }
 
     public void ClickField()
