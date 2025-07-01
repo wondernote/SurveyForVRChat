@@ -2094,7 +2094,7 @@ MonoBehaviour:
       Data: 122|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: AudioManager, com.wondernote.survey-vrchat
+      Data: WonderNote.Survey.AudioManager, com.wondernote.survey-vrchat
     - Name: 
       Entry: 8
       Data: 

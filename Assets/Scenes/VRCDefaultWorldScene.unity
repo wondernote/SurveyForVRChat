@@ -527,6 +527,8 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 77b3c3835c59f2544bf1aaf01f19b594, type: 2}
   - {fileID: 2100000, guid: 67b77d10a1c7ebe42b4a08b90d4350fb, type: 2}
   - {fileID: 2100000, guid: c20bad47f4cc2574484970befc8f9868, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: dde4168020e4aac44b361cfa004b06f5, type: 2}
   - {fileID: 2100000, guid: b175cee6f2ba55541a3003594e3f3d49, type: 2}
   LightMapsNear: []
   LightMapsFar: []
@@ -610,6 +612,47 @@ MonoBehaviour:
     ID: 32
     SerializedTypeNames:
     - VRC.Udon.UdonBehaviour
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 33
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 34
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 35
+    SerializedTypeNames:
+    - VRC.SDK3.Components.VRCPickup
+  - gameObject: {fileID: 0}
+    ID: 36
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 37
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 38
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 39
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 40
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 41
+    SerializedTypeNames:
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 0}
+    ID: 42
+    SerializedTypeNames:
     - VRC.Udon.UdonBehaviour
   portraitCameraPositionOffset: {x: 0, y: 0, z: 0}
   portraitCameraRotationOffset: {x: 0, y: 1, z: 0, w: -0.00000004371139}

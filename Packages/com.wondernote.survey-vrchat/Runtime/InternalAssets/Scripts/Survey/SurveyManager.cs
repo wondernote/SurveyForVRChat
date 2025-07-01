@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using VRC.SDK3.Persistence;
 using System;
 using VRC.Udon.Common.Interfaces;
+using WonderNote.Survey;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class SurveyManager : UdonSharpBehaviour
