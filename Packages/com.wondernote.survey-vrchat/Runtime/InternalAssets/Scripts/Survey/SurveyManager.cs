@@ -102,6 +102,10 @@ public class SurveyManager : UdonSharpBehaviour
 
     private DateTime startDate;
     private DateTime endDate;
+    private bool hasStartDate = true;
+    private bool hasEndDate = true;
+    private const string START_SENTINEL = "1970-01-01";
+    private const string END_SENTINEL = "9999-12-30";
 
     private int numQuestions = 0;
     private string[] questionTypes;
@@ -120,6 +124,8 @@ public class SurveyManager : UdonSharpBehaviour
     private int coverTimeRequired;
 
     private GameObject[] questionPanels;
+
+    private bool questionPanelsBuilt = false;
 
     private void SetSurveyFacingPlayer()
     {
@@ -165,7 +171,7 @@ public class SurveyManager : UdonSharpBehaviour
             backgroundImage.color = themeColor;
             closeButton.GetComponent<Image>().color = themeColor;
             intro.text = "このアンケートはすでに回答済みです。\nご協力ありがとうございました。";
-            info.text = $"回答期間：{startDate:yyyy/MM/dd} ～ {endDate.AddDays(-1):yyyy/MM/dd}";
+            info.text = $"回答期間：{BuildPeriodLabel()}";
             startButton.gameObject.SetActive(false);
             loadingContainer.SetActive(false);
             return;
@@ -173,6 +179,17 @@ public class SurveyManager : UdonSharpBehaviour
 
         CreateSurveyUI();
         loadingContainer.SetActive(false);
+    }
+
+    private string BuildPeriodLabel()
+    {
+        if (hasStartDate && hasEndDate)
+            return $"{startDate:yyyy/MM/dd} ～ {endDate.AddDays(-1):yyyy/MM/dd}";
+        if (hasStartDate && !hasEndDate)
+            return $"{startDate:yyyy/MM/dd} から";
+        if (!hasStartDate && hasEndDate)
+            return $"{endDate.AddDays(-1):yyyy/MM/dd} まで";
+        return "随時";
     }
 
     private void ProcessConfigJson(string json)
@@ -195,18 +212,23 @@ public class SurveyManager : UdonSharpBehaviour
             }
 
             DataToken periodToken = dict["period"];
+            hasStartDate = false;
+            hasEndDate = false;
             if (periodToken.TokenType == TokenType.DataDictionary)
             {
                 var periodDict = periodToken.DataDictionary;
-                string startStr = periodDict["startAt"].String;
-                string endStr   = periodDict["endAt"].String;
 
-                startDate = DateTime.ParseExact(startStr, "yyyy-MM-dd", null);
-                endDate   = DateTime.ParseExact(endStr, "yyyy-MM-dd", null).AddDays(1);
-            }
-            else
-            {
-                Debug.LogError("period is not in expected format");
+                var startToken = periodDict["startAt"];
+                if (startToken.TokenType == TokenType.String && !string.IsNullOrEmpty(startToken.String) && startToken.String != START_SENTINEL) {
+                    startDate = DateTime.ParseExact(startToken.String, "yyyy-MM-dd", null);
+                    hasStartDate = true;
+                }
+
+                var endToken = periodDict["endAt"];
+                if (endToken.TokenType == TokenType.String && !string.IsNullOrEmpty(endToken.String) && endToken.String != END_SENTINEL) {
+                    endDate = DateTime.ParseExact(endToken.String, "yyyy-MM-dd", null).AddDays(1);
+                    hasEndDate = true;
+                }
             }
 
             DataToken colorToken = dict["themeColor"];
@@ -348,16 +370,19 @@ public class SurveyManager : UdonSharpBehaviour
         sendingSpinner.color = themeColor;
 
         DateTime now = DateTime.Now;
-        bool isWithinPeriod = (now >= startDate) && (now < endDate);
+        DateTime startBoundary = hasStartDate ? startDate : DateTime.MinValue;
+        DateTime endBoundary = hasEndDate ? endDate.AddHours(3) : DateTime.MaxValue;
+        bool isWithinPeriod = (now >= startBoundary) && (now < endBoundary);
 
         if (!isWithinPeriod) {
-            if (now < startDate) {
+            if (now < startBoundary) {
                 intro.text = "このアンケートはまだ開始されていません。";
             } else {
                 intro.text = "このアンケートの受付は終了しました。";
             }
 
-            info.text = $"回答期間：{startDate:yyyy/MM/dd} ～ {endDate.AddDays(-1):yyyy/MM/dd}";
+            info.text = $"回答期間：{BuildPeriodLabel()}";
+
             startButton.gameObject.SetActive(false);
             return;
         }
@@ -365,6 +390,11 @@ public class SurveyManager : UdonSharpBehaviour
         intro.text = coverIntroText;
         var formatted = FormatDuration(coverTimeRequired);
         info.text = $"■ 質問数: {numQuestions}問（所要時間: {formatted}）　■ 回答はすべて匿名です\n■「信頼されていないURLを許可」をONにしてください";
+    }
+
+    private void BuildQuestionPanelsIfNeeded()
+    {
+        if (questionPanelsBuilt) return;
 
         for (int i = 0; i < numQuestions; i++) {
             GameObject panel = null;
@@ -490,6 +520,8 @@ public class SurveyManager : UdonSharpBehaviour
             questionPanels[i] = panel;
         }
 
+        questionPanelsBuilt = true;
+
         ShowFirstQuestionPanel();
     }
 
@@ -533,6 +565,12 @@ public class SurveyManager : UdonSharpBehaviour
     {
         isButtonClicked = false;
 
+        BuildQuestionPanelsIfNeeded();
+        SendCustomEventDelayedFrames(nameof(_ShowUI), 2);
+    }
+
+    public void _ShowUI()
+    {
         surveyInterface.transform.localScale = new Vector3(1f, 1f, 1f);
         startingContainer.SetActive(false);
 

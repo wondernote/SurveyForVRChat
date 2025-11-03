@@ -2,41 +2,44 @@
 using UnityEngine;
 using UnityEditor;
 
-[InitializeOnLoad]
-static class TmpWarningSuppressor
+namespace WonderNote.Survey.Editor
 {
-    private static readonly ILogHandler originalLogHandler;
-
-    static TmpWarningSuppressor()
+    [InitializeOnLoad]
+    static class TmpWarningSuppressor
     {
-        originalLogHandler = Debug.unityLogger.logHandler;
-        Debug.unityLogger.logHandler = new FilteredLogHandler(originalLogHandler);
-    }
+        private static readonly ILogHandler originalLogHandler;
 
-    private class FilteredLogHandler : ILogHandler
-    {
-        private readonly ILogHandler wrapped;
-
-        public FilteredLogHandler(ILogHandler wrapped)
+        static TmpWarningSuppressor()
         {
-            this.wrapped = wrapped;
+            originalLogHandler = Debug.unityLogger.logHandler;
+            Debug.unityLogger.logHandler = new FilteredLogHandler(originalLogHandler);
         }
 
-        public void LogException(System.Exception exception, Object context)
+        private class FilteredLogHandler : ILogHandler
         {
-            originalLogHandler.LogException(exception, context);
-        }
+            private readonly ILogHandler wrapped;
 
-        public void LogFormat(LogType logType, Object context, string format, params object[] args)
-        {
-            string message = (args != null && args.Length > 0) ? string.Format(format, args) : format;
-
-            if (logType == LogType.Warning && message.Contains("[WonderNote_EmptySDF]"))
+            public FilteredLogHandler(ILogHandler wrapped)
             {
-                return;
+                this.wrapped = wrapped;
             }
 
-            wrapped.LogFormat(logType, context, format, args);
+            public void LogException(System.Exception exception, Object context)
+            {
+                originalLogHandler.LogException(exception, context);
+            }
+
+            public void LogFormat(LogType logType, Object context, string format, params object[] args)
+            {
+                string message = (args != null && args.Length > 0) ? string.Format(format, args) : format;
+
+                if (logType == LogType.Warning && message.Contains("[WonderNote_EmptySDF]"))
+                {
+                    return;
+                }
+
+                wrapped.LogFormat(logType, context, format, args);
+            }
         }
     }
 }
