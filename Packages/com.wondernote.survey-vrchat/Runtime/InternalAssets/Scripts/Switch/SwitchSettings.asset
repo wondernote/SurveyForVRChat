@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SwitchSettings
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 9b2fb95ac7d33054a808005fa9328b99,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: bc72e198605d2154cbfc371d13f88316,
     type: 2}
   udonAssembly: 
   assemblyError: 

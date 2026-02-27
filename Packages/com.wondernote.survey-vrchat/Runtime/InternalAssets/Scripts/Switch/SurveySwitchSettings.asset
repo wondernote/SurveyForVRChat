@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SurveySwitchSettings
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 3eff3a162ec7646469e721e5bfc576f6,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 5fb3d776806af654c9ad08354c5b9c7c,
     type: 2}
   udonAssembly: 
   assemblyError: 

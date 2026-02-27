@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: FadePanel
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: c8d9d706f84ae0e409a795127c82d967,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: d1d31cfeef20f0a4cb11b53f92427e7e,
     type: 2}
   udonAssembly: 
   assemblyError: 
