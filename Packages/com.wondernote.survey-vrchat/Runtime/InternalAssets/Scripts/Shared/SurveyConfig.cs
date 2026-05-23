@@ -17,7 +17,7 @@ public class SurveyConfig : UdonSharpBehaviour
     [SerializeField, HideInInspector] private VRCUrl[] freeTextPrefixUrls;
 
     private const int MaxQuestions = 20;
-    private const int MaxValue = 10;
+    private const int MaxValue = 127;
     private const int SlotsPerQ = MaxValue + 1;
 
     #if UNITY_EDITOR && !COMPILER_UDONSHARP
@@ -72,6 +72,12 @@ public class SurveyConfig : UdonSharpBehaviour
         }
 
         int idx = questionIndex * SlotsPerQ + value;
+
+        if (responseUrls == null || idx < 0 || idx >= responseUrls.Length) {
+            Debug.LogError($"responseUrls is not ready for question {questionIndex + 1}, value {value}. Please re-save SurveyConfig in the Unity Editor.");
+            return null;
+        }
+
         return responseUrls[idx];
     }
 

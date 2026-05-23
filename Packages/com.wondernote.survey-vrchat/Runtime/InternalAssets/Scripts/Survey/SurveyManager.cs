@@ -64,6 +64,7 @@ public class SurveyManager : UdonSharpBehaviour
     private int currentQuestion = 0;
 
     private bool isButtonClicked = false;
+    private string validationWarningMessage = "";
 
     [Header("Audio Settings")]
     [SerializeField] private AudioManager audioManager;
@@ -112,6 +113,9 @@ public class SurveyManager : UdonSharpBehaviour
     private bool[] questionRequired;
     private string[] questionTexts;
     private string[][] questionChoices;
+    private bool[] questionMultiple;
+    private int[] questionMinSelections;
+    private int[] questionMaxSelections;
     private string[] scaleLeftLabels;
     private string[] scaleRightLabels;
     private string[] answers;
@@ -268,6 +272,9 @@ public class SurveyManager : UdonSharpBehaviour
                 questionRequired = new bool[numQuestions];
                 questionTexts = new string[numQuestions];
                 questionChoices = new string[numQuestions][];
+                questionMultiple = new bool[numQuestions];
+                questionMinSelections = new int[numQuestions];
+                questionMaxSelections = new int[numQuestions];
                 scaleLeftLabels = new string[numQuestions];
                 scaleRightLabels = new string[numQuestions];
                 answers = new string[numQuestions];
@@ -291,6 +298,10 @@ public class SurveyManager : UdonSharpBehaviour
 
                         if (questionTypes[i] == "choice")
                         {
+                            questionMultiple[i] = GetOptionalBool(qDict, "multiple", false);
+                            questionMinSelections[i] = GetOptionalInt(qDict, "minSelections", 0);
+                            questionMaxSelections[i] = GetOptionalInt(qDict, "maxSelections", 0);
+
                             if (choicesToken.TokenType == TokenType.DataList)
                             {
                                 int innerCount = choicesToken.DataList.Count;
@@ -406,15 +417,16 @@ public class SurveyManager : UdonSharpBehaviour
                     panel = Instantiate(singleChoicePanelPrefab, surveyPanelParent);
 
                     SingleChoicePanelController singleChoiceController = panel.GetComponent<SingleChoicePanelController>();
-                    singleChoiceController.InitializePanel(this, i);
+                    singleChoiceController.InitializePanel(this, i, questionMultiple[i], questionMinSelections[i], questionMaxSelections[i]);
 
                     Transform optionContainer = panel.transform.Find("OptionContainer");
 
                     var qLabelSingle = panel.transform.Find("QuestionLabel").GetComponent<TextMeshProUGUI>();
+                    string multipleLabel = questionMultiple[i] ? "<size=16><color=#DC3545><voffset=1.5em> (複数選択)</voffset></color></size>" : "";
                     if (questionRequired[i]) {
-                        qLabelSingle.text = $"{questionTexts[i]} <size=60><color=#DC3545>*</color></size>";
+                        qLabelSingle.text = $"{questionTexts[i]} <size=55><color=#DC3545><voffset=-0.08em>*</voffset></color></size>{multipleLabel}";
                     } else {
-                        qLabelSingle.text = questionTexts[i];
+                        qLabelSingle.text = $"{questionTexts[i]}{multipleLabel}";
                     }
 
                     for (int j = 0; j < choices.Length; j++) {
@@ -592,18 +604,39 @@ public class SurveyManager : UdonSharpBehaviour
         freeTextVRCUrls[questionIndex] = url;
     }
 
+    private bool GetOptionalBool(DataDictionary dict, string key, bool defaultValue)
+    {
+        DataToken token;
+        if (dict.TryGetValue(key, out token) && token.TokenType == TokenType.Boolean) {
+            return token.Boolean;
+        }
+
+        return defaultValue;
+    }
+
+    private int GetOptionalInt(DataDictionary dict, string key, int defaultValue)
+    {
+        DataToken token;
+        if (dict.TryGetValue(key, out token) && token.TokenType == TokenType.Double) {
+            int value = (int)token.Double;
+            return value < 0 ? 0 : value;
+        }
+
+        return defaultValue;
+    }
+
     public void GoNext()
     {
         isButtonClicked = false;
 
-        if (string.IsNullOrEmpty(answers[currentQuestion]) && questionRequired[currentQuestion])
+        if (!ValidateCurrentQuestion())
         {
-            string message = "この質問は必須です";
+            string message = validationWarningMessage;
             DisplayWarning(message);
             return;
         }
 
-        SubmitAnswerForQuestion(currentQuestion);
+        if (!SubmitAnswerForQuestion(currentQuestion)) return;
 
         GameObject currentPanel = questionPanels[currentQuestion];
         Animator currentAnim = currentPanel.GetComponent<Animator>();
@@ -636,9 +669,70 @@ public class SurveyManager : UdonSharpBehaviour
         }
     }
 
+    private bool ValidateCurrentQuestion()
+    {
+        validationWarningMessage = "";
+
+        if (string.IsNullOrEmpty(answers[currentQuestion]) && questionRequired[currentQuestion])
+        {
+            validationWarningMessage = "この質問は必須です";
+            return false;
+        }
+
+        if (GetType(questionTypes[currentQuestion]) != "choice") return true;
+
+        if (!questionMultiple[currentQuestion]) return true;
+
+        int selectedCount = GetSelectionCount(currentQuestion);
+
+        if (selectedCount == 0 && !questionRequired[currentQuestion]) return true;
+
+        int minSelections = questionMinSelections[currentQuestion];
+        int maxSelections = questionMaxSelections[currentQuestion];
+
+        if (minSelections > 0 && minSelections == maxSelections && selectedCount != minSelections)
+        {
+            validationWarningMessage = $"{minSelections}つ選んでください";
+            return false;
+        }
+
+        if (minSelections > 0 && selectedCount < minSelections)
+        {
+            validationWarningMessage = $"{minSelections}つ以上選んでください";
+            return false;
+        }
+
+        if (maxSelections > 0 && selectedCount > maxSelections)
+        {
+            validationWarningMessage = $"選べるのは{maxSelections}つまでです";
+            return false;
+        }
+
+        return true;
+    }
+
+    private int GetSelectionCount(int questionIndex)
+    {
+        string answer = answers[questionIndex];
+
+        if (string.IsNullOrEmpty(answer)) return 0;
+
+        if (!questionMultiple[questionIndex]) return 1;
+
+        int bitmask = int.Parse(answer);
+        int count = 0;
+        for (int i = 0; i < 7; i++)
+        {
+            int bit = 1 << i;
+            if ((bitmask & bit) != 0) count++;
+        }
+
+        return count;
+    }
+
     private int pendingDownloads = 0;
 
-    private void SubmitAnswerForQuestion(int questionIndex)
+    private bool SubmitAnswerForQuestion(int questionIndex)
     {
         if (!hasStartedTimer) {
             hasStartedTimer = true;
@@ -652,13 +746,13 @@ public class SurveyManager : UdonSharpBehaviour
         if (type == "freeText") {
             targetUrl = freeTextVRCUrls[questionIndex];
 
-            if (targetUrl.Equals(lastSentFreeTextUrls[questionIndex])) return;
+            if (targetUrl.Equals(lastSentFreeTextUrls[questionIndex])) return true;
 
             lastSentFreeTextUrls[questionIndex] = targetUrl;
         } else {
             string answer = answers[questionIndex];
 
-            if ((lastSentAnswers[questionIndex] != null) && (answer == lastSentAnswers[questionIndex])) return;
+            if ((lastSentAnswers[questionIndex] != null) && (answer == lastSentAnswers[questionIndex])) return true;
 
             int optionIndex;
             if (string.IsNullOrEmpty(answer)) {
@@ -668,11 +762,17 @@ public class SurveyManager : UdonSharpBehaviour
             }
 
             targetUrl = surveyConfig.GetResponseUrl(questionIndex, optionIndex);
+            if (targetUrl == null) {
+                DisplayWarning("設定に問題があります");
+                return false;
+            }
+
             lastSentAnswers[questionIndex] = answer;
         }
 
         pendingDownloads++;
         VRCStringDownloader.LoadUrl(targetUrl, this.GetComponent<UdonBehaviour>());
+        return true;
     }
 
     public override void OnStringLoadSuccess(IVRCStringDownload download)
