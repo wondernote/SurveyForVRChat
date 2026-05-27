@@ -40,6 +40,10 @@ public class FreeTextPanelController : FadePanel
     [SerializeField] private Sprite normalSprite;
     [SerializeField] private Sprite hoveredSprite;
     [SerializeField] private Sprite focusedSprite;
+    [SerializeField] private Image inputHelpNormalImage;
+    [SerializeField] private Image inputHelpHoverImage;
+
+    private bool isInputHelpHovered = false;
 
     public void InitializePanel(SurveyManager manager, int qIndex, VRCUrl _url)
     {
@@ -59,6 +63,8 @@ public class FreeTextPanelController : FadePanel
         if (questionIndex == 0 && actualText != null) {
             actualText.color = new Color32(50, 50, 50, 255);
         }
+
+        SetInputHelpHoverVisible(false);
     }
 
     public void ClickField()
@@ -134,6 +140,39 @@ public class FreeTextPanelController : FadePanel
         }
     }
 
+    public void ApplyThemeColor(Color color)
+    {
+        inputHelpNormalImage.color = color;
+        inputHelpHoverImage.color = color;
+    }
+
+    public void InputHelpPointerEnter()
+    {
+        if (isInputHelpHovered) return;
+        
+        surveyManager.PlayHoverSound();
+        SetInputHelpHoverVisible(true);
+    }
+
+    public void InputHelpPointerExit()
+    {
+        if (!isInputHelpHovered) return;
+
+        SetInputHelpHoverVisible(false);
+    }
+
+    public void ToggleInputHelp()
+    {
+        surveyManager.OpenInputHelpModal();
+    }
+
+    private void SetInputHelpHoverVisible(bool hovered)
+    {
+        isInputHelpHovered = hovered;
+        inputHelpNormalImage.gameObject.SetActive(!hovered);
+        inputHelpHoverImage.gameObject.SetActive(hovered);
+    }
+
     public void OnValueChanged()
     {
         lastInputTime = Time.time;
@@ -206,6 +245,7 @@ public class FreeTextPanelController : FadePanel
     public override void FadeOutStarted()
     {
         actualText.color = new Color32(50, 50, 50, 0);
+        SetInputHelpHoverVisible(false);
     }
 
     public void ResetPanel()
@@ -220,5 +260,6 @@ public class FreeTextPanelController : FadePanel
         dummyPrompt.SetActive(false);
 
         isActive = false;
+        SetInputHelpHoverVisible(false);
     }
 }

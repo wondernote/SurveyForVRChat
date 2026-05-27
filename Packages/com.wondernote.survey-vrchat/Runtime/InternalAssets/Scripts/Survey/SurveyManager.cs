@@ -51,6 +51,10 @@ public class SurveyManager : UdonSharpBehaviour
     [SerializeField] private Image progressFill;
     [SerializeField] private Image sendingSpinner;
 
+    [Header("Input Help Modal Settings")]
+    [SerializeField] private GameObject inputHelpModalRoot;
+    private bool isInputHelpModalOpen = false;
+
     [Header("Warning Message Settings")]
     [SerializeField] private GameObject warningMessage;
     [SerializeField] private TextMeshProUGUI warningText;
@@ -182,6 +186,7 @@ public class SurveyManager : UdonSharpBehaviour
         }
 
         CreateSurveyUI();
+        SetInputHelpModalVisible(false);
         loadingContainer.SetActive(false);
     }
 
@@ -446,6 +451,7 @@ public class SurveyManager : UdonSharpBehaviour
                     FreeTextPanelController freeTextController = panel.GetComponent<FreeTextPanelController>();
                     VRCUrl prefixUrl = surveyConfig.GetFreeTextPrefix(i);
                     freeTextController.InitializePanel(this, i, prefixUrl);
+                    freeTextController.ApplyThemeColor(themeColor);
 
                     var qLabelFree = panel.transform.Find("QuestionLabel").GetComponent<TextMeshProUGUI>();
                     if (questionRequired[i]) {
@@ -843,6 +849,8 @@ public class SurveyManager : UdonSharpBehaviour
     public void CloseSurvey()
     {
         isButtonClicked = false;
+        SetInputHelpModalVisible(false);
+
         if (alreadySentStarted && !alreadySentFinished) {
             ResetSurvey();
         }
@@ -931,6 +939,24 @@ public class SurveyManager : UdonSharpBehaviour
         }
     }
 
+    public void OpenInputHelpModal()
+    {
+        PlayClickSound();
+        SetInputHelpModalVisible(true);
+    }
+
+    public void CloseInputHelpModal()
+    {
+        PlayClickSound();
+        SetInputHelpModalVisible(false);
+    }
+
+    private void SetInputHelpModalVisible(bool visible)
+    {
+        inputHelpModalRoot.SetActive(visible);
+        isInputHelpModalOpen = visible;
+    }
+
     public void OnPointerEnter()
     {
         PlayHoverSound();
@@ -964,11 +990,14 @@ public class SurveyManager : UdonSharpBehaviour
 
     public void HideSurveyUI()
     {
+        SetInputHelpModalVisible(false);
         surveyContainer.SetActive(false);
     }
 
     private void ResetSurvey()
     {
+        SetInputHelpModalVisible(false);
+
         currentQuestion = 0;
         targetProgress = 0f;
         isSending = false;
